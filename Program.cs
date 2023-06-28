@@ -4,7 +4,23 @@ using TearApi;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("TearList"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddCors();
+builder.Services.AddSession(options=>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // session expires after 30 minutes of inactivity
+});
+
 var app = builder.Build();
+app.MapControllers();
+
+//Configure CORS
+app.UseCors(builder =>
+{
+    builder.AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader();
+});
+app.UseSession();
 
 var UserItemsController = app.MapGroup("/useritems");
 var MatchController = app.MapGroup("/match");
@@ -23,7 +39,9 @@ OppositeItemsController.MapPost("/", CreateOpposite);
 
 app.Run();
 
-static async Task<IResult> GetMatch(int ownUserId, AppDbContext db)
+
+
+    static async Task<IResult> GetMatch(int ownUserId, AppDbContext db)
 {
     var user = await db.Users.FindAsync(ownUserId);
 
