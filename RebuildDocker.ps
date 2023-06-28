@@ -1,0 +1,5 @@
+Write-Host 'Rebuilding docker container'
+docker stop tearapi-container
+docker rm tearapi-container
+docker build -t tearapi .
+docker run -d -p 8080:8080 --name tearapi-container tearapi
